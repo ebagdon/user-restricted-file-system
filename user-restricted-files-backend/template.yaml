@@ -6,6 +6,11 @@ Description: >
 Globals:
     Function:
         Timeout: 3
+    Api:
+        Cors:
+            AllowHeaders: "'Content-Type'"
+            AllowOrigin: "'http://localhost:5173'"
+            AllowMethods: "'POST,OPTIONS'"
 
 Resources:
     GetAWSCredentials:
@@ -21,4 +26,4 @@ Resources:
                     Type: Api
                     Properties:
                         Path: /aws_credentials
-                        Method: get
+                        Method: post

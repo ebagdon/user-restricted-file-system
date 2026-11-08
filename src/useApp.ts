@@ -5,7 +5,11 @@ export default function useApp() {
     const auth = useAuth();
 
     const [authStatus, setAuthStatus] = useState('');
+
     const awsCredentialsAPIEndpoint = 'https://boi6iey9wl.execute-api.us-east-1.amazonaws.com/Prod/aws_credentials';
+    const [awsCredentialsRetrieved, setAwsCredentialsRetrieved] = useState(false);
+    const [accessKeyId, setAccessKeyId] = useState('');
+    const [secretKey, setSecretKey] = useState('');
 
     function onAuthenticationButtonPressed() {
         setAuthStatus('Loading...');
@@ -14,38 +18,53 @@ export default function useApp() {
 
     async function getAWSCredentials() {
         try {
-            if (auth.user?.id_token) {
-                const response = await fetch(awsCredentialsAPIEndpoint, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ IdentityId: auth.user.id_token }),
-                });
+            const response = await fetch(awsCredentialsAPIEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    IdToken: auth.user!.id_token,
+                }),
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (!response.ok) {
-                    console.log('ERROR ENCOUNTERED:', response.status, data);
-                }
-
-                console.log('SUCCESS:', data);
-            } else {
-                console.log('ERROR ENCOUNTERED: User did not have id_token.');
+            if (!response.ok) {
+                console.log('ERROR ENCOUNTERED:', response.status, data);
+                return null;
             }
+
+            setAwsCredentialsRetrieved(true);
+            setAccessKeyId(data['accessKeyId']);
+            setSecretKey(data['secretKey']);
+
+            console.log('SUCCESS:', data);
+            return data;
         } catch (error) {
-            console.log('ERROR ENCOUNTERED:', error);
+            console.log('CAUGHT ERROR:', error);
+            return null;
         }
     }
 
     useEffect(() => {
-        if (auth.isAuthenticated) {
-            setAuthStatus('Successfully signed in');
-            getAWSCredentials();
-        } else if (auth.error) {
-            setAuthStatus('Encountering error: ' + auth.error.message);
+        async function processAuthentication() {
+            if (auth.isAuthenticated) {
+                setAuthStatus('Signed in. Now connecting...');
+                const response = await getAWSCredentials();
+
+                if (response) {
+                    setAuthStatus('Connected');
+                } else {
+                    setAuthStatus('Failed to get AWS credentials');
+                }
+            } else if (auth.error) {
+                setAuthStatus('Encountering error: ' + auth.error.message);
+            }
         }
+
+        processAuthentication();
     }, [auth]);
 
-    return { authStatus, onAuthenticationButtonPressed };
+    return { authStatus, awsCredentialsRetrieved, onAuthenticationButtonPressed };
 }
