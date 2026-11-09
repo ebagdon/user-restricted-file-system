@@ -6,24 +6,25 @@ export default function useApp() {
 
     const [authStatus, setAuthStatus] = useState('');
 
-    const awsCredentialsAPIEndpoint = 'https://boi6iey9wl.execute-api.us-east-1.amazonaws.com/Prod/aws_credentials';
-    const [awsCredentialsRetrieved, setAwsCredentialsRetrieved] = useState(false);
-    const [accessKeyId, setAccessKeyId] = useState('');
-    const [secretKey, setSecretKey] = useState('');
+    const S3URLsAPIEndpoint = 'https://boi6iey9wl.execute-api.us-east-1.amazonaws.com/Prod/get_s3_urls';
+    const [S3URLsRetrieved, setS3URLsRetrieved] = useState(false);
 
     function onAuthenticationButtonPressed() {
         setAuthStatus('Loading...');
         auth.signinRedirect();
     }
 
-    async function getAWSCredentials() {
+    async function onDownloadButtonPressed() {}
+
+    async function getS3URLs() {
         try {
-            const response = await fetch(awsCredentialsAPIEndpoint, {
+            const response = await fetch(S3URLsAPIEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    AccessToken: auth.user!.access_token,
                     IdToken: auth.user!.id_token,
                 }),
             });
@@ -35,9 +36,7 @@ export default function useApp() {
                 return null;
             }
 
-            setAwsCredentialsRetrieved(true);
-            setAccessKeyId(data['accessKeyId']);
-            setSecretKey(data['secretKey']);
+            setS3URLsRetrieved(true);
 
             console.log('SUCCESS:', data);
             return data;
@@ -51,12 +50,12 @@ export default function useApp() {
         async function processAuthentication() {
             if (auth.isAuthenticated) {
                 setAuthStatus('Signed in. Now connecting...');
-                const response = await getAWSCredentials();
+                const response = await getS3URLs();
 
                 if (response) {
                     setAuthStatus('Connected');
                 } else {
-                    setAuthStatus('Failed to get AWS credentials');
+                    setAuthStatus('Failed to get S3 URLs');
                 }
             } else if (auth.error) {
                 setAuthStatus('Encountering error: ' + auth.error.message);
@@ -66,5 +65,5 @@ export default function useApp() {
         processAuthentication();
     }, [auth]);
 
-    return { authStatus, awsCredentialsRetrieved, onAuthenticationButtonPressed };
+    return { authStatus, onAuthenticationButtonPressed, onDownloadButtonPressed, S3URLsRetrieved };
 }

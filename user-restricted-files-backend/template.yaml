@@ -16,14 +16,14 @@ Resources:
     GetAWSCredentials:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: get_aws_credentials/
+            CodeUri: get_s3_urls/
             Handler: app.lambda_handler
             Runtime: python3.14
             Architectures:
                 - x86_64
             Events:
-                GetAWSCredentials:
+                GetS3URLs:
                     Type: Api
                     Properties:
-                        Path: /aws_credentials
+                        Path: /get_s3_urls
                         Method: post

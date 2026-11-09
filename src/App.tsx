@@ -7,14 +7,16 @@ export default function App() {
 
     return (
         <div className='mainDiv'>
-            {app.awsCredentialsRetrieved ? (
-                <button className='mainButton'>Download</button>
+            {app.S3URLsRetrieved ? (
+                <button className='mainButton' onClick={app.onDownloadButtonPressed}>
+                    Download
+                </button>
             ) : (
                 <button className='mainButton' onClick={app.onAuthenticationButtonPressed}>
                     Authenticate
                 </button>
             )}
-            <p className='mainButtonText'>{app.authStatus != '' && !app.awsCredentialsRetrieved && app.authStatus}</p>
+            <p className='mainButtonText'>{app.authStatus != '' && !app.S3URLsRetrieved && app.authStatus}</p>
         </div>
     );
 }
