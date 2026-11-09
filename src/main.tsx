@@ -11,7 +11,7 @@ const cognitoAuthConfig = {
     client_id: '6ggm1g2vahp2bnrac0r59m0bdr',
     redirect_uri: 'http://localhost:5173/',
     response_type: 'code',
-    scope: 'email openid',
+    scope: 'aws.cognito.signin.user.admin email openid',
 };
 
 createRoot(document.getElementById('root')!).render(

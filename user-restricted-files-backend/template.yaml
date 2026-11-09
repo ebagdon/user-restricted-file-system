@@ -5,7 +5,7 @@ Description: >
 
 Globals:
     Function:
-        Timeout: 3
+        Timeout: 10
     Api:
         Cors:
             AllowHeaders: "'Content-Type'"
@@ -13,11 +13,12 @@ Globals:
             AllowMethods: "'POST,OPTIONS'"
 
 Resources:
-    GetAWSCredentials:
+    GetS3URLs:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: get_s3_urls/
             Handler: app.lambda_handler
+            Policies: ['arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess']
             Runtime: python3.14
             Architectures:
                 - x86_64

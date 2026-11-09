@@ -6,7 +6,7 @@ export default function useApp() {
 
     const [authStatus, setAuthStatus] = useState('');
 
-    const S3URLsAPIEndpoint = 'https://boi6iey9wl.execute-api.us-east-1.amazonaws.com/Prod/get_s3_urls';
+    const S3URLsAPIEndpoint = 'https://s3c6yjjrgi.execute-api.us-east-1.amazonaws.com/Prod/get_s3_urls';
     const [S3URLsRetrieved, setS3URLsRetrieved] = useState(false);
 
     function onAuthenticationButtonPressed() {
