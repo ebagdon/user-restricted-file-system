@@ -30,7 +30,7 @@ def lambda_handler(event, context):
         bucket_objects = []
         list_objects_response = s3_client.list_objects_v2(
             Bucket='user-restricted-files',
-            Prefix=valid_s3_prefix
+            Prefix=valid_s3_prefix,
         )
         for object in list_objects_response['Contents']:
             bucket_objects.append(object)
@@ -51,9 +51,6 @@ def lambda_handler(event, context):
                 ExpiresIn=1200,
             )
             presigned_urls.append(presigned_url)
-
-        key = "companyA/text.txt"  # a key you've confirmed exists in the console
-        print(s3_client.head_object(Bucket='user-restricted-files', Key=key))
 
         return {
             'statusCode': 200,
