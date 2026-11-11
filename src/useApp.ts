@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
+
 export default function useApp() {
     const auth = useAuth();
 
@@ -10,18 +13,39 @@ export default function useApp() {
     const [S3KeysURLsRetrieved, setS3KeysURLsRetrieved] = useState(false);
     const [S3KeysURLs, setS3KeysURLs] = useState([]);
 
+    const [downloadStatus, setDownloadStatus] = useState('');
+
     function onAuthenticationButtonPressed() {
         setAuthStatus('Loading...');
         auth.signinRedirect();
     }
 
     async function onDownloadButtonPressed() {
+        setDownloadStatus('Downloading files...');
+
         let S3KeysData = [];
         for (let i = 0; i < S3KeysURLs.length; i++) {
             const response = await fetch(S3KeysURLs[i][1], {
                 method: 'GET',
             });
-            S3KeysData.push([S3KeysURLs[i][0], await response.blob()]);
+            const newKeyData: [string, Blob] = [S3KeysURLs[i][0], await response.blob()];
+            S3KeysData.push(newKeyData);
+        }
+
+        let zip = new JSZip();
+        for (let i = 0; i < S3KeysData.length; i++) {
+            const currentKey = S3KeysData[i][0];
+            const data = S3KeysData[i][1];
+            zip.file(currentKey, data);
+        }
+
+        try {
+            await zip.generateAsync({ type: 'blob' }).then(function (blob) {
+                saveAs(blob, 'data.zip');
+            });
+            setDownloadStatus('Download success');
+        } catch {
+            setDownloadStatus('Download failed');
         }
     }
 
@@ -75,5 +99,12 @@ export default function useApp() {
         processAuthentication();
     }, [auth]);
 
-    return { authStatus, onAuthenticationButtonPressed, onDownloadButtonPressed, S3KeysURLs, S3KeysURLsRetrieved };
+    return {
+        authStatus,
+        downloadStatus,
+        onAuthenticationButtonPressed,
+        onDownloadButtonPressed,
+        S3KeysURLs,
+        S3KeysURLsRetrieved,
+    };
 }

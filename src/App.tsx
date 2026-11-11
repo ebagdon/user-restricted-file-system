@@ -19,9 +19,8 @@ export default function App() {
                     Authenticate
                 </button>
             )}
-            <p className='authenticationStatusText'>
-                {app.authStatus != '' && !app.S3KeysURLsRetrieved && app.authStatus}
-            </p>
+            <p className='statusText'>{app.authStatus != '' && !app.S3KeysURLsRetrieved && app.authStatus}</p>
+            <p className='statusText'>{app.downloadStatus != '' && app.downloadStatus}</p>
         </div>
     );
 }
