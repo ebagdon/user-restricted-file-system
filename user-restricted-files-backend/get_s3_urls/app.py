@@ -43,14 +43,14 @@ def lambda_handler(event, context):
             for object in list_objects_response['Contents']:
                 bucket_objects.append(object)
 
-        presigned_urls = []
+        s3_keys_urls = []
         for object in bucket_objects:
             presigned_url = s3_client.generate_presigned_url(
                 'get_object',
                 Params={'Bucket': 'user-restricted-files', 'Key': object['Key']},
                 ExpiresIn=1200,
             )
-            presigned_urls.append(presigned_url)
+            s3_keys_urls.append([object['Key'], presigned_url])
 
         return {
             'statusCode': 200,
@@ -59,7 +59,7 @@ def lambda_handler(event, context):
                 "Content-Type": "application/json",
             },
             'body': json.dumps({
-                'S3URLs': presigned_urls
+                'S3KeysURLs': s3_keys_urls
             }),
         }
     except Exception as error:

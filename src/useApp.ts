@@ -7,14 +7,23 @@ export default function useApp() {
     const [authStatus, setAuthStatus] = useState('');
 
     const S3URLsAPIEndpoint = 'https://s3c6yjjrgi.execute-api.us-east-1.amazonaws.com/Prod/get_s3_urls';
-    const [S3URLsRetrieved, setS3URLsRetrieved] = useState(false);
+    const [S3KeysURLsRetrieved, setS3KeysURLsRetrieved] = useState(false);
+    const [S3KeysURLs, setS3KeysURLs] = useState([]);
 
     function onAuthenticationButtonPressed() {
         setAuthStatus('Loading...');
         auth.signinRedirect();
     }
 
-    async function onDownloadButtonPressed() {}
+    async function onDownloadButtonPressed() {
+        let S3KeysData = [];
+        for (let i = 0; i < S3KeysURLs.length; i++) {
+            const response = await fetch(S3KeysURLs[i][1], {
+                method: 'GET',
+            });
+            S3KeysData.push([S3KeysURLs[i][0], await response.blob()]);
+        }
+    }
 
     async function getS3URLs() {
         try {
@@ -36,7 +45,8 @@ export default function useApp() {
                 return null;
             }
 
-            setS3URLsRetrieved(true);
+            setS3KeysURLsRetrieved(true);
+            setS3KeysURLs(data['S3KeysURLs']);
 
             console.log('SUCCESS:', data);
             return data;
@@ -49,7 +59,7 @@ export default function useApp() {
     useEffect(() => {
         async function processAuthentication() {
             if (auth.isAuthenticated) {
-                setAuthStatus('Signed in. Now connecting...');
+                setAuthStatus('Signed in. Now retrieving download URLs...');
                 const response = await getS3URLs();
 
                 if (response) {
@@ -65,5 +75,5 @@ export default function useApp() {
         processAuthentication();
     }, [auth]);
 
-    return { authStatus, onAuthenticationButtonPressed, onDownloadButtonPressed, S3URLsRetrieved };
+    return { authStatus, onAuthenticationButtonPressed, onDownloadButtonPressed, S3KeysURLs, S3KeysURLsRetrieved };
 }
