@@ -6,7 +6,7 @@ import App from './App.tsx';
 
 import { CONFIG } from './constants/Config.ts';
 
-import './main.css';
+import './css/Main.css';
 
 const cognitoAuthConfig = {
     authority: 'https://cognito-idp.us-east-1.amazonaws.com/' + CONFIG.cognitoUserPoolID,
