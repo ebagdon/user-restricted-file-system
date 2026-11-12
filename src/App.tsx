@@ -1,25 +1,24 @@
-import useApp from './useApp';
+import { STRINGS } from './constants/Strings';
 
-import './App.css';
+import useApp from './hooks/useApp';
+
+import './css/App.css';
 
 export default function App() {
     const app = useApp();
 
     return (
         <div className='mainDiv'>
-            {app.S3KeysURLsRetrieved ? (
+            {app.S3KeysAndURLsRetrieved ? (
                 <button className='mainButton' onClick={app.onDownloadButtonPressed}>
-                    Download
+                    {STRINGS.downloadButtonText}
                 </button>
             ) : (
-                <button
-                    className='mainButton'
-                    disabled={app.authStatus != ''}
-                    onClick={app.onAuthenticationButtonPressed}>
-                    Authenticate
+                <button className='mainButton' disabled={app.authStatus != ''} onClick={app.onAuthButtonPressed}>
+                    {STRINGS.authButtonText}
                 </button>
             )}
-            <p className='statusText'>{app.authStatus != '' && !app.S3KeysURLsRetrieved && app.authStatus}</p>
+            <p className='statusText'>{app.authStatus != '' && !app.S3KeysAndURLsRetrieved && app.authStatus}</p>
             <p className='statusText'>{app.downloadStatus != '' && app.downloadStatus}</p>
         </div>
     );

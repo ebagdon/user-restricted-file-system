@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    backend-sam-app
+
+Globals:
+    Function:
+        Timeout: 7
+    Api:
+        Cors:
+            AllowHeaders: "'Content-Type'"
+            AllowOrigin: !GetAtt WebsiteDistribution.DomainName
+            AllowMethods: "'POST,OPTIONS'"
+
+Resources:
+    GetS3KeysAndURLsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: get-s3-keys-and-urls/
+            Handler: app.lambda_handler
+            Policies:
+                Statement:
+                    Effect: Allow
+                    Action:
+                        - 's3:GetObject'
+                        - 's3:ListBucket'
+                    Resource: !GetAtt FilesBucket.Arn
+            Runtime: python3.14
+            Architectures:
+                - x86_64
+            Events:
+                GetS3KeysAndURLs:
+                    Type: Api
+                    Properties:
+                        Path: /get-s3-keys-and-urls
+                        Method: post
+    FilesBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: 'user-restricted-files'
+            CorsConfiguration:
+                CorsRules:
+                    - AllowedHeaders:
+                          - 'Access-Control-Allow-Origin'
+                    - AllowedMethods:
+                          - GET
+                    - AllowedOrigins:
+                          - !GetAtt WebsiteDistribution.DomainName
+    FilesBucketPolicy:
+        Type: AWS::S3::BucketPolicy
+        Properties:
+            Bucket: !Ref FilesBucket
+            PolicyDocument:
+                Statement:
+                    Effect: Deny
+                    Principal: '*'
+                    Action: 's3:*'
+                    Resource: !GetAtt FilesBucket.Arn
+                    Condition:
+                        Bool:
+                            aws:SecureTransport: false
+    WebsiteBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: 'user-restricted-files-website'
+    WebsiteDistribution:
+        Type: AWS::CloudFront::Distribution
+        Properties:
+            DistributionConfig:
+                Origins:
+                    - DomainName: !GetAtt FilesBucket.RegionalDomainName
+                DefaultCacheBehaviour:
+                    TargetOriginId: !Ref FilesBucket
+                    ViewerProtocolPolicy: 'https-only'
+                DefaultRootObject: index.html
+                Enabled: true
+    WebsiteUserPool:
+        Type: AWS::Cognito::UserPool
+        Properties:
+            EmailConfiguration:
+                EmailSendingAccount: 'DEVELOPER'
+                From: 'qiveal@gmail.com'
+                SourceArn: 'arn:aws:ses:us-east-1:279706066644:identity/qiveal@gmail.com'
+            Schema:
+                - SchemaAttribute:
+                      AttributeDataType: String
+                      Mutable: true
+                      Name: 's3:prefix'
+            UserPoolName: 'user-restricted-files'
+    WebsiteUserPoolClient:
+        Type: AWS::Cognito::UserPoolClient
+        Properties:
+            ClientName: 'user-restricted-files-website'
+            ExplicitAuthFlows:
+                - ALLOW_USER_AUTH
+            UserPoolId: !Ref WebsiteUserPool
