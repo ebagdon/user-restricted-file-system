@@ -6,14 +6,9 @@ Description: >
 Globals:
     Function:
         Timeout: 7
-    Api:
-        Cors:
-            AllowHeaders: "'Content-Type'"
-            AllowOrigin: !GetAtt WebsiteDistribution.DomainName
-            AllowMethods: "'POST,OPTIONS'"
 
 Resources:
-    GetS3KeysAndURLsFunction:
+    GetS3KeysAndURLsFunctionTest:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: get-s3-keys-and-urls/
@@ -32,20 +27,12 @@ Resources:
                 GetS3KeysAndURLs:
                     Type: Api
                     Properties:
-                        Path: /get-s3-keys-and-urls
+                        Path: /get-s3-keys-and-urls-test
                         Method: post
     FilesBucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: 'user-restricted-files'
-            CorsConfiguration:
-                CorsRules:
-                    - AllowedHeaders:
-                          - 'Access-Control-Allow-Origin'
-                    - AllowedMethods:
-                          - GET
-                    - AllowedOrigins:
-                          - !GetAtt WebsiteDistribution.DomainName
+            BucketName: 'user-restricted-files-test'
     FilesBucketPolicy:
         Type: AWS::S3::BucketPolicy
         Properties:
@@ -62,18 +49,69 @@ Resources:
     WebsiteBucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: 'user-restricted-files-website'
+            BucketName: 'user-restricted-files-website-test'
+    WebsiteBucketPolicy:
+        Type: AWS::S3::BucketPolicy
+        Properties:
+            Bucket: !Ref WebsiteBucket
+            PolicyDocument:
+                Version: 2008-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: 'cloudfront.amazonaws.com'
+                      Action: 's3:GetObject'
+                      Resource: !Ref WebsiteBucket
+                      Condition:
+                          StringEquals:
+                              AWS:SourceArn: !ref WebsiteDistribution
     WebsiteDistribution:
         Type: AWS::CloudFront::Distribution
         Properties:
             DistributionConfig:
-                Origins:
-                    - DomainName: !GetAtt FilesBucket.RegionalDomainName
-                DefaultCacheBehaviour:
-                    TargetOriginId: !Ref FilesBucket
+                DefaultCacheBehavior:
+                    CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad'
+                    TargetOriginId: !Ref WebsiteBucket
                     ViewerProtocolPolicy: 'https-only'
                 DefaultRootObject: index.html
                 Enabled: true
+                Origins:
+                    - CustomOriginConfig:
+                          OriginProtocolPolicy: 'https-only'
+                      DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+                      Id: !Ref WebsiteBucket
+                      OriginAccessControlId: !Ref WebsiteDistributionOAC
+    WebsiteDistributionOAC:
+        Type: AWS::CloudFront::OriginAccessControl
+        Properties:
+            OriginAccessControlConfig:
+                Name: 'user-restricted-files-website-oac'
+                OriginAccessControlOriginType: s3
+                SigningBehavior: always
+                SigningProtocol: sigv4
+    WebsiteDistributionHeadersPolicy:
+        Type: AWS::CloudFront::ResponseHeadersPolicy
+        Properties:
+            ResponseHeadersPolicyConfig:
+                CorsConfig:
+                    AccessControlAllowCredentials: false
+                    AccessControlAllowHeaders:
+                        Items:
+                            - Access-Control-Allow-Origin
+                    AccessControlAllowMethods:
+                        Items:
+                            - OPTIONS
+                            - POST
+                    AccessControlAllowOrigins:
+                        Items:
+                            - !GetAtt WebsiteDistribution.DomainName
+                    OriginOverride: true
+                CustomHeadersConfig:
+                    Items:
+                        - Header: 'Content-Type'
+                          Override: true
+                          Value: 'application/json'
+                Name: 'user-restricted-files-website-policy-test'
     WebsiteUserPool:
         Type: AWS::Cognito::UserPool
         Properties:
@@ -82,15 +120,18 @@ Resources:
                 From: 'qiveal@gmail.com'
                 SourceArn: 'arn:aws:ses:us-east-1:279706066644:identity/qiveal@gmail.com'
             Schema:
-                - SchemaAttribute:
-                      AttributeDataType: String
-                      Mutable: true
-                      Name: 's3:prefix'
-            UserPoolName: 'user-restricted-files'
+                - AttributeDataType: String
+                  Mutable: true
+                  Name: 's3-prefix'
+            UsernameAttributes:
+                - email
+            UserPoolName: 'user-restricted-files-test'
     WebsiteUserPoolClient:
         Type: AWS::Cognito::UserPoolClient
         Properties:
-            ClientName: 'user-restricted-files-website'
+            ClientName: 'user-restricted-files-website-test'
             ExplicitAuthFlows:
                 - ALLOW_USER_AUTH
             UserPoolId: !Ref WebsiteUserPool
+            WriteAttributes:
+                - email

@@ -1,8 +1,6 @@
 import boto3
 import json
 
-WEBSITE_URL = 'http://localhost:5173'
-
 S3_PREFIX_USER_ATTRIBUTE = 'custom:s3-prefix'
 S3_BUCKET_NAME = 'user-restricted-files'
 
@@ -23,10 +21,6 @@ def lambda_handler(event, context):
         if valid_s3_prefix == '':
             return {
                 'statusCode': 400,
-                'headers': {
-                    "Access-Control-Allow-Origin": WEBSITE_URL,
-                    "Content-Type": "application/json",
-                },
                 'body': json.dumps({
                     'error': 'Failed to get a valid S3 prefix for downloading files.',
                 }),
@@ -59,10 +53,6 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'headers': {
-                "Access-Control-Allow-Origin": WEBSITE_URL,
-                "Content-Type": "application/json",
-            },
             'body': json.dumps({
                 'S3KeysAndURLs': s3_keys_and_urls
             }),
@@ -72,10 +62,6 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 500,
-            'headers': {
-                "Access-Control-Allow-Origin": WEBSITE_URL,
-                "Content-Type": "application/json",
-            },
             'body': json.dumps({
                 'message': 'Failed to retrieve data from S3',
             }),
