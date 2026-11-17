@@ -1,8 +1,10 @@
 export const CONFIG = {
-    cognitoUserPoolID: 'us-east-1_9yY916m5W',
-    cognitoAppClientID: '6ilc60t3v50ciip7ag5gar768t',
+    cognitoUserPoolID: 'us-east-1_wtevgE17w',
+    cognitoAppClientID: '6uaurj783l3e75m6a488hgp59r',
 
-    S3KeysAndURLsAPIEndpoint: 'https://9d9nz394o8.execute-api.us-east-1.amazonaws.com/Prod/get-s3-keys-and-urls-test',
+    // include https
+    S3KeysAndURLsAPIEndpoint: 'https://fzy2lrw8hh.execute-api.us-east-1.amazonaws.com/Prod/get-s3-keys-and-urls-test',
 
-    websiteURL: 'd3qpassq39ro71.cloudfront.net',
+    // include https
+    websiteURL: 'https://d1bfeiejmwrdlx.cloudfront.net',
 } as const;

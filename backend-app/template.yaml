@@ -4,6 +4,13 @@ Description: >
     backend-sam-app
 
 Globals:
+    Api:
+        Cors:
+            AllowHeaders: "'Content-Type'"
+            AllowMethods: "'POST,OPTIONS'"
+            AllowOrigin: !Sub
+                - "'https://${WebsiteDomain}'"
+                - WebsiteDomain: !GetAtt WebsiteDistribution.DomainName
     Function:
         Timeout: 7
 
@@ -23,6 +30,12 @@ Resources:
             Runtime: python3.14
             Architectures:
                 - x86_64
+            Environment:
+                Variables:
+                    S3BucketName: !Ref FilesBucket
+                    WebsiteDomain: !Sub
+                        - 'https://${WebsiteDistributionDomain}'
+                        - WebsiteDistributionDomain: !GetAtt WebsiteDistribution.DomainName
             Events:
                 GetS3KeysAndURLs:
                     Type: Api
@@ -33,6 +46,17 @@ Resources:
         Type: AWS::S3::Bucket
         Properties:
             BucketName: 'user-restricted-files-test'
+            CorsConfiguration:
+                CorsRules:
+                    - AllowedHeaders:
+                          - '*'
+                      AllowedMethods:
+                          - GET
+                      AllowedOrigins:
+                          - !Sub
+                            - 'https://${WebsiteDistributionDomain}'
+                            - WebsiteDistributionDomain: !GetAtt WebsiteDistribution.DomainName
+
     FilesBucketPolicy:
         Type: AWS::S3::BucketPolicy
         Properties:
@@ -55,16 +79,21 @@ Resources:
         Properties:
             Bucket: !Ref WebsiteBucket
             PolicyDocument:
-                Version: 2008-10-17
+                Version: 2012-10-17
                 Statement:
                     - Effect: Allow
                       Principal:
                           Service: 'cloudfront.amazonaws.com'
                       Action: 's3:GetObject'
-                      Resource: !Ref WebsiteBucket
+                      Resource: !Sub
+                          - '${WebsiteBucketArn}/*'
+                          - WebsiteBucketArn: !GetAtt WebsiteBucket.Arn
                       Condition:
                           StringEquals:
-                              AWS:SourceArn: !ref WebsiteDistribution
+                              AWS:SourceArn: !Sub
+                                  - 'arn:aws:cloudfront::${AccountId}:distribution/${WebsiteDistributionId}'
+                                  - AccountId: !Ref AWS::AccountId
+                                    WebsiteDistributionId: !Ref WebsiteDistribution
     WebsiteDistribution:
         Type: AWS::CloudFront::Distribution
         Properties:
@@ -76,8 +105,8 @@ Resources:
                 DefaultRootObject: index.html
                 Enabled: true
                 Origins:
-                    - CustomOriginConfig:
-                          OriginProtocolPolicy: 'https-only'
+                    - S3OriginConfig:
+                          OriginReadTimeout: 30
                       DomainName: !GetAtt WebsiteBucket.RegionalDomainName
                       Id: !Ref WebsiteBucket
                       OriginAccessControlId: !Ref WebsiteDistributionOAC
@@ -89,29 +118,6 @@ Resources:
                 OriginAccessControlOriginType: s3
                 SigningBehavior: always
                 SigningProtocol: sigv4
-    WebsiteDistributionHeadersPolicy:
-        Type: AWS::CloudFront::ResponseHeadersPolicy
-        Properties:
-            ResponseHeadersPolicyConfig:
-                CorsConfig:
-                    AccessControlAllowCredentials: false
-                    AccessControlAllowHeaders:
-                        Items:
-                            - Access-Control-Allow-Origin
-                    AccessControlAllowMethods:
-                        Items:
-                            - OPTIONS
-                            - POST
-                    AccessControlAllowOrigins:
-                        Items:
-                            - !GetAtt WebsiteDistribution.DomainName
-                    OriginOverride: true
-                CustomHeadersConfig:
-                    Items:
-                        - Header: 'Content-Type'
-                          Override: true
-                          Value: 'application/json'
-                Name: 'user-restricted-files-website-policy-test'
     WebsiteUserPool:
         Type: AWS::Cognito::UserPool
         Properties:
@@ -119,6 +125,11 @@ Resources:
                 EmailSendingAccount: 'DEVELOPER'
                 From: 'qiveal@gmail.com'
                 SourceArn: 'arn:aws:ses:us-east-1:279706066644:identity/qiveal@gmail.com'
+            Policies:
+                SignInPolicy:
+                    AllowedFirstAuthFactors:
+                        - EMAIL_OTP
+                        - PASSWORD
             Schema:
                 - AttributeDataType: String
                   Mutable: true
@@ -126,12 +137,37 @@ Resources:
             UsernameAttributes:
                 - email
             UserPoolName: 'user-restricted-files-test'
+    WebsiteUserPoolDomain:
+        Type: AWS::Cognito::UserPoolDomain
+        Properties:
+            Domain: userrestrictedfiles
+            ManagedLoginVersion: 2
+            UserPoolId: !Ref WebsiteUserPool
+    WebsiteUserPoolManagedLoginBranding:
+        Type: AWS::Cognito::ManagedLoginBranding
+        Properties:
+            UserPoolId: !Ref WebsiteUserPool
+            ClientId: !Ref WebsiteUserPoolClient
+            UseCognitoProvidedValues: true
     WebsiteUserPoolClient:
         Type: AWS::Cognito::UserPoolClient
         Properties:
+            AllowedOAuthFlows:
+                - code
+            AllowedOAuthFlowsUserPoolClient: true
+            AllowedOAuthScopes:
+                - aws.cognito.signin.user.admin
+                - email
+                - openid
+            CallbackURLs:
+                - !Sub
+                  - 'https://${WebsiteDomain}'
+                  - WebsiteDomain: !GetAtt WebsiteDistribution.DomainName
             ClientName: 'user-restricted-files-website-test'
             ExplicitAuthFlows:
                 - ALLOW_USER_AUTH
+            SupportedIdentityProviders:
+                - COGNITO
             UserPoolId: !Ref WebsiteUserPool
             WriteAttributes:
                 - email
