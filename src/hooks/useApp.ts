@@ -25,23 +25,23 @@ export default function useApp() {
     async function onDownloadButtonPressed() {
         setDownloadStatus(STRINGS.downloadingFilesStatus);
 
-        let S3KeysAndData = [];
-        for (let i = 0; i < S3KeysAndURLs.length; i++) {
-            const response = await fetch(S3KeysAndURLs[i][1], {
-                method: 'GET',
-            });
-            const newKeyAndData: [string, Blob] = [S3KeysAndURLs[i][0], await response.blob()];
-            S3KeysAndData.push(newKeyAndData);
-        }
-
-        let zip = new JSZip();
-        for (let i = 0; i < S3KeysAndData.length; i++) {
-            const key = S3KeysAndData[i][0];
-            const data = S3KeysAndData[i][1];
-            zip.file(key, data);
-        }
-
         try {
+            let S3KeysAndData = [];
+            for (let i = 0; i < S3KeysAndURLs.length; i++) {
+                const response = await fetch(S3KeysAndURLs[i][1], {
+                    method: 'GET',
+                });
+                const newKeyAndData: [string, Blob] = [S3KeysAndURLs[i][0], await response.blob()];
+                S3KeysAndData.push(newKeyAndData);
+            }
+
+            let zip = new JSZip();
+            for (let i = 0; i < S3KeysAndData.length; i++) {
+                const key = S3KeysAndData[i][0];
+                const data = S3KeysAndData[i][1];
+                zip.file(key, data);
+            }
+
             await zip.generateAsync({ type: 'blob' }).then(function (blob) {
                 saveAs(blob, 'data.zip');
             });
@@ -51,7 +51,7 @@ export default function useApp() {
         }
     }
 
-    async function getS3URLs() {
+    async function getS3KeysAndURLs() {
         try {
             const response = await fetch(CONFIG.S3KeysAndURLsAPIEndpoint, {
                 method: 'POST',
@@ -70,10 +70,10 @@ export default function useApp() {
             }
 
             setS3KeysAndURLsRetrieved(true);
-            setS3KeysAndURLs(data['S3KeysURLs']);
+            setS3KeysAndURLs(data['S3KeysAndURLs']);
 
             return data;
-        } catch (error) {
+        } catch {
             return null;
         }
     }
@@ -82,7 +82,7 @@ export default function useApp() {
         async function processAuthentication() {
             if (auth.isAuthenticated) {
                 setAuthStatus(STRINGS.authSuccessStatus);
-                const response = await getS3URLs();
+                const response = await getS3KeysAndURLs();
 
                 if (response) {
                     setAuthStatus(STRINGS.authConnectedStatus);
