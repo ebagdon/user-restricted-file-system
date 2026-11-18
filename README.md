@@ -20,7 +20,7 @@
    ```
    sam deploy
    ```
-5. Next, open up **src/constants/Config.ts**. You will see several strings consisting of text like "PUT HERE." Replace those with the needed values.
+5. Next, open up **src/constants/Config.ts**. You will see several strings consisting of text like "PUT HERE." Replace those with the needed values (NOTE: For the API endpoint get the URL from the post method of the s3-object-data resource on the prod stage).
 6. Finally, build the React app with the following command:
    ```
    npm run build
