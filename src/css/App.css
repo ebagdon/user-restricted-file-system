@@ -31,3 +31,35 @@
     font-size: 18px;
     font-weight: bold;
 }
+
+.downloadProgressBarContainer {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+}
+
+.downloadProgressBarBackground {
+    width: 250px;
+    height: 25px;
+
+    border-radius: 8px;
+
+    background-color: rgb(219, 219, 219);
+}
+
+.downloadProgressBarFill {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background-color: rgb(12, 247, 0);
+}
+
+.downloadProgressBarText {
+    margin-top: 5px;
+
+    font-size: 18px;
+
+    color: rgb(255, 255, 255);
+}

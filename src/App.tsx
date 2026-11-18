@@ -9,8 +9,11 @@ export default function App() {
 
     return (
         <div className='mainDiv'>
-            {app.S3KeysAndURLsRetrieved ? (
-                <button className='mainButton' onClick={app.onDownloadButtonPressed}>
+            {app.S3ObjectDataRetrieved ? (
+                <button
+                    className='mainButton'
+                    disabled={app.downloadStatus != '' && app.downloadStatus != STRINGS.downloadSuccessStatus}
+                    onClick={app.onDownloadButtonPressed}>
                     {STRINGS.downloadButtonText}
                 </button>
             ) : (
@@ -19,8 +22,16 @@ export default function App() {
                 </button>
             )}
             <p className='statusText'>
-                {app.authStatus != '' && !app.S3KeysAndURLsRetrieved ? app.authStatus : app.downloadStatus}
+                {app.authStatus != '' && !app.S3ObjectDataRetrieved ? app.authStatus : app.downloadStatus}
             </p>
+            {app.downloadStatus != '' && (
+                <div className='downloadProgressBarContainer'>
+                    <div className='downloadProgressBarBackground'>
+                        <div className='downloadProgressBarFill' style={{ width: `${app.downloadProgress}%` }} />
+                    </div>
+                    <span className='downloadProgressBarText'>{app.downloadProgress}%</span>
+                </div>
+            )}
         </div>
     );
 }

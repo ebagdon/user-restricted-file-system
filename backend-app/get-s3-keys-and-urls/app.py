@@ -45,14 +45,14 @@ def lambda_handler(event, context):
             for object in list_objects_response['Contents']:
                 bucket_objects.append(object)
 
-        s3_keys_and_urls = []
+        s3_object_data = []
         for object in bucket_objects:
             presigned_url = s3_client.generate_presigned_url(
                 'get_object',
                 Params={'Bucket': os.environ.get('S3BucketName'), 'Key': object['Key']},
                 ExpiresIn=7200, # url will expire in 2 hours
             )
-            s3_keys_and_urls.append([object['Key'], presigned_url])
+            s3_object_data.append([object['Key'], presigned_url, object['Size']])
 
         return {
             'statusCode': 200,
@@ -60,7 +60,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Origin': os.environ.get('WebsiteDomain')
             },
             'body': json.dumps({
-                'S3KeysAndURLs': s3_keys_and_urls
+                'S3ObjectData': s3_object_data
             }),
         }
     except Exception as error:
