@@ -32,4 +32,4 @@
 
 1. Go to the users area of your newly created Cognito user pool and click on create user. Put in the end user's email and copy the settings in the image below (**THE APP HAS ONLY BEEN TESTED TO WORK WITH THESE SETTINGS**):
 <img width="1642" height="577" alt="image" src="https://github.com/user-attachments/assets/d3cdcf49-9dbf-4303-bc2e-97bd3774d43c" />
-2. Go to your newly created cloudfront distribution and launch the app. The user will be directed through the authentication and download processes.
+2. Go to your newly created cloudfront distribution and copy the domain name into your browser to launch the app. The user will be directed through the authentication and download processes.
