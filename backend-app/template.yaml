@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-    backend-sam-app
+    user-restricted-file-system-backend-sam-app
 
 Globals:
     Api:
@@ -12,13 +12,13 @@ Globals:
                 - "'https://${WebsiteDomain}'"
                 - WebsiteDomain: !GetAtt WebsiteDistribution.DomainName
     Function:
-        Timeout: 7
+        Timeout: 60
 
 Resources:
-    GetS3KeysAndURLsFunctionTest:
+    GetS3ObjectDataFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: get-s3-keys-and-urls/
+            CodeUri: get-s3-object-data/
             Handler: app.lambda_handler
             Policies:
                 Statement:
@@ -42,15 +42,15 @@ Resources:
                         - 'https://${WebsiteDistributionDomain}'
                         - WebsiteDistributionDomain: !GetAtt WebsiteDistribution.DomainName
             Events:
-                GetS3KeysAndURLs:
+                GetS3ObjectData:
                     Type: Api
                     Properties:
-                        Path: /get-s3-keys-and-urls-test
+                        Path: /s3-object-data
                         Method: post
     FilesBucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: 'user-restricted-files-test'
+            BucketName: 'REPLACE_WITH_NAME'
             CorsConfiguration:
                 CorsRules:
                     - AllowedHeaders:
@@ -77,7 +77,7 @@ Resources:
     WebsiteBucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: 'user-restricted-files-website-test'
+            BucketName: 'REPLACE_WITH_NAME'
     WebsiteBucketPolicy:
         Type: AWS::S3::BucketPolicy
         Properties:
@@ -118,7 +118,7 @@ Resources:
         Type: AWS::CloudFront::OriginAccessControl
         Properties:
             OriginAccessControlConfig:
-                Name: 'user-restricted-files-website-oac'
+                Name: 'REPLACE_WITH_NAME'
                 OriginAccessControlOriginType: s3
                 SigningBehavior: always
                 SigningProtocol: sigv4
@@ -127,8 +127,8 @@ Resources:
         Properties:
             EmailConfiguration:
                 EmailSendingAccount: 'DEVELOPER'
-                From: 'qiveal@gmail.com'
-                SourceArn: 'arn:aws:ses:us-east-1:279706066644:identity/qiveal@gmail.com'
+                From: 'REPLACE_WITH_EMAIL'
+                SourceArn: 'arn:aws:ses:us-east-1:279706066644:identity/REPLACE_WITH_EMAIL'
             Policies:
                 SignInPolicy:
                     AllowedFirstAuthFactors:
@@ -140,11 +140,11 @@ Resources:
                   Name: 's3-prefix'
             UsernameAttributes:
                 - email
-            UserPoolName: 'user-restricted-files-test'
+            UserPoolName: 'REPLACE_WITH_NAME'
     WebsiteUserPoolDomain:
         Type: AWS::Cognito::UserPoolDomain
         Properties:
-            Domain: userrestrictedfiles
+            Domain: REPLACE_WITH_NAME
             ManagedLoginVersion: 2
             UserPoolId: !Ref WebsiteUserPool
     WebsiteUserPoolManagedLoginBranding:
@@ -167,7 +167,7 @@ Resources:
                 - !Sub
                   - 'https://${WebsiteDomain}'
                   - WebsiteDomain: !GetAtt WebsiteDistribution.DomainName
-            ClientName: 'user-restricted-files-website-test'
+            ClientName: 'REPLACE_WITH_NAME'
             ExplicitAuthFlows:
                 - ALLOW_USER_AUTH
             SupportedIdentityProviders:

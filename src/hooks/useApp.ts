@@ -63,7 +63,13 @@ export default function useApp() {
 
         try {
             const handle = await (window as any).showSaveFilePicker({
+                excludeAcceptAllOption: true,
                 suggestedName: 'data.zip',
+                types: [
+                    {
+                        accept: { 'application/zip': ['.zip'] },
+                    },
+                ],
             });
             const writable = await handle.createWritable();
 
