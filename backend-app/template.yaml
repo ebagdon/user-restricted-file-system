@@ -128,7 +128,7 @@ Resources:
             EmailConfiguration:
                 EmailSendingAccount: 'DEVELOPER'
                 From: 'REPLACE_WITH_EMAIL'
-                SourceArn: 'arn:aws:ses:us-east-1:279706066644:identity/REPLACE_WITH_EMAIL'
+                SourceArn: 'REPLACE_WITH_SES_EMAIL_IDENTITY_ARN'
             Policies:
                 SignInPolicy:
                     AllowedFirstAuthFactors:
