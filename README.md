@@ -1,5 +1,5 @@
 # Prerequisites
-**NOTE:** This documentation assumes that you are familiar with AWS.
+**NOTE:** This documentation assumes that you are familiar with AWS and other technologies.
 1. Make sure that you have the AWS CLI installed and that you are logged in with your credentials.
 2. Have the AWS SAM CLI installed.
 3. Make sure you have Node.js and NPM installed.
