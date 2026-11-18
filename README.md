@@ -13,13 +13,15 @@
    npm install
    ```
 3. In **backend-app/template.yaml** there will be several strings that contain the word **"REPLACE"** with other words to serve as instructions. Search for all these strings and replace all of them with the described contents. **For all replacements you make be sure not to remove any quotes.**
-4. Open a terminal in the **backend-app/** directory. Then run the following commands to deploy the AWS infrastructure (**WAIT FOR THE FIRST COMMAND TO FINISH BEFORE EXECUTING THE NEXT**):
+4. Open a terminal in the **backend-app/** directory. Then run the following commands to deploy the AWS infrastructure (NOTE: When the deploy command prompts you to set default arguments you should give the responses shown in the image below):
    ```
    sam build
    ```
    ```
-   sam deploy
+   sam deploy --guided
    ```
+<img width="663" height="246" alt="image" src="https://github.com/user-attachments/assets/d306680d-edd1-4e29-9f9c-123896e47db9" />
+
 5. Next, open up **src/constants/Config.ts**. You will see several strings consisting of text like "PUT HERE." Replace those with the needed values (NOTE: For the API endpoint get the URL from the post method of the s3-object-data resource on the prod stage).
 6. Finally, build the React app with the following command:
    ```
