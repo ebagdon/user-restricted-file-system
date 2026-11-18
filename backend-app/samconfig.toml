@@ -3,7 +3,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "user-restricted-files-backend-app"
+stack_name = "user-restricted-file-system"
 
 [default.build.parameters]
 cached = true
