@@ -12,7 +12,7 @@
    ```
    npm install
    ```
-3. In **backend-app/template.yaml** there will be several strings that contain **REPLACE_WITH_NAME** or **REPLACE_WITH_EMAIL**. If you see REPLACE_WITH_NAME replace that string with a unique name for the resource. Remember that the name you give it must be unique because others may have downloaded this project. In addition, when you see REPLACE_WITH_EMAIL replace the string contents with your verified Amazon SES identity. Search for all these strings and replace all of them. **For all replacements you make be sure not to remove any quotes.**
+3. In **backend-app/template.yaml** there will be several strings that contain the word **"REPLACE"** with other words to serve as instructions. Search for all these strings and replace all of them with the described contents. **For all replacements you make be sure not to remove any quotes.**
 4. Open a terminal in the **backend-app/** directory. Then run the following commands to deploy the AWS infrastructure (**WAIT FOR THE FIRST COMMAND TO FINISH BEFORE EXECUTING THE NEXT**):
    ```
    sam build
