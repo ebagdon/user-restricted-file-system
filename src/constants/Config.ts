@@ -1,10 +1,10 @@
 export const CONFIG = {
-    cognitoUserPoolID: 'us-east-1_wtevgE17w',
-    cognitoAppClientID: '6uaurj783l3e75m6a488hgp59r',
+    cognitoUserPoolID: 'PUT_ID_HERE',
+    cognitoAppClientID: 'PUT_ID_HERE',
 
     // include https
-    S3KeysAndURLsAPIEndpoint: 'https://fzy2lrw8hh.execute-api.us-east-1.amazonaws.com/Prod/get-s3-keys-and-urls-test',
+    S3KeysAndURLsAPIEndpoint: 'PUT_API_ENDPOINT_HERE',
 
     // include https
-    websiteURL: 'https://d1bfeiejmwrdlx.cloudfront.net',
+    websiteURL: 'PUT_CLOUDFRONT_DOMAIN_NAME_HERE',
 } as const;
