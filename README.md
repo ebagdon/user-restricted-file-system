@@ -3,7 +3,7 @@
 1. Make sure that you have the AWS CLI installed and that you are logged in with your credentials.
 2. Have the AWS SAM CLI installed.
 3. Make sure you have Node.js and NPM installed.
-4. You must have a verified email to send email with Amazon SES. Make sure your SES account is in production mode and not sandbox.
+4. You must have a email verified with Amazon SES. Make sure your SES account is in production mode and not sandbox.
 
 # Setup
 
